@@ -69,7 +69,17 @@ static NSString *Title = @"Title";
 }
 
 - (BOOL)tableView:(UITableView *)tableView isCellExpanded:(NSIndexPath *)indexPath {
-	return nil != self.expandedItems[indexPath];
+	NSDictionary *item = [self itemForIndexPath:indexPath];
+	
+	NSNumber *initialState = self.expandedItems[indexPath];
+	BOOL isInitialStateUndefined = !initialState;
+	
+	if (isInitialStateUndefined && [item isKindOfClass:NSDictionary.class]) {
+		self.expandedItems[indexPath] = @(YES);
+		return [item[Subitems] count] > 0;
+	}
+	
+	return initialState.boolValue;
 }
 
 - (NSUInteger)tableView:(UITableView *)tableView numberOfSubCellsForCellAtIndexPath:(NSIndexPath *)indexPath {
@@ -110,7 +120,7 @@ static NSString *Title = @"Title";
 	
 	BOOL isExpanded = [self.treeModel isExpanded:treeIndexPath];
 	if (isExpanded) {
-		[self.expandedItems removeObjectForKey:treeIndexPath];
+		self.expandedItems[treeIndexPath] = @(NO);
 		[self.treeModel close:treeIndexPath];
 	} else {
 		NSDictionary *item = [self itemForIndexPath:treeIndexPath];
